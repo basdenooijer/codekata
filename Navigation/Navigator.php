@@ -6,11 +6,17 @@ class Navigator
 {
     private Map $map;
     private bool $debug;
+    private NavigationStrategyInterface $strategy;
 
-    public function __construct(Map $map, $debug = false)
+    public function __construct(Map $map, NavigationStrategyInterface $strategy, $debug = false)
     {
         $this->map = $map;
         $this->debug = $debug;
+        $this->strategy = $strategy;
+
+        if ($debug) {
+            system('clear');
+        }
     }
 
     public function navigate(): void
@@ -23,7 +29,7 @@ class Navigator
 
     public function explorePath(Path $path): void
     {
-        foreach ($this->getMovementOptions($path) as $option) {
+        foreach ($this->strategy->getMovementOptions($this->map, $path) as $option) {
             $newPath = $path->addMove($option);
 
             if ($this->debug) {
@@ -43,27 +49,6 @@ class Navigator
         }
 
         //TODO return value
-    }
-
-    private function getMovementOptions(Path $path): iterable
-    {
-        $tiles = $this->map->getSurroundingTiles($path->getX(), $path->getY());
-
-        $options = [];
-        foreach ($tiles as $direction => $tile) {
-            if (!$tile instanceof TileInterface) continue;
-
-            if (!$tile->isAccessible($path->getStatus())) continue;
-
-            $option = new MovementOption($path->getDirection(), $direction, $tile);
-
-            // prevents back moves for instance
-            if (!$path->canMove($option)) continue;
-
-            yield $option;
-        }
-
-        return $options;
     }
 
     private function move($option): void
