@@ -29,6 +29,7 @@ class LookAheadNavigationStrategy extends BruteForceNavigationStrategy
             $distanceA = $this->getDistanceFromTarget($optionA, $targetX, $targetY);
             $distanceB = $this->getDistanceFromTarget($optionB, $targetX, $targetY);
 
+            //TODO this only looks ahead one step, should be recursive (with a sane limit)
             if ($distanceA === $distanceB) {
                 [$optionA, $optionB] = $this->lookAhead($map, $path, $optionA, $optionB, $targetY, $targetX);
                 $distanceA = $this->getDistanceFromTarget($optionA, $targetX, $targetY);
@@ -51,12 +52,12 @@ class LookAheadNavigationStrategy extends BruteForceNavigationStrategy
         $nextOptionsB = $this->getMovementOptions($map, $path->addMove($optionB));
 
         return [
-            $this->determineBestOptionDistance($nextOptionsA, $targetY, $targetX),
-            $this->determineBestOptionDistance($nextOptionsB, $targetY, $targetX)
+            $this->determineBestOption($nextOptionsA, $targetY, $targetX),
+            $this->determineBestOption($nextOptionsB, $targetY, $targetX)
         ];
     }
 
-    private function determineBestOptionDistance(iterable $options, int $targetY, int $targetX): MovementOption
+    private function determineBestOption(iterable $options, int $targetY, int $targetX): MovementOption
     {
         $bestDistance = 999999;
         $bestOption = null;
