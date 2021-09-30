@@ -53,14 +53,18 @@ class Map
         return new self($rows);
     }
 
-    public function draw(): string
+    public function draw(?Path $path = null): string
     {
-        $output = '';
+        $output = chr(27) . "[0G";
+        $output .= chr(27) . sprintf("[%dA", count($this->rows));
+
         foreach ($this->rows as $row) {
             foreach ($row as $tile) {
-                $output .= $tile->getChar();
-
-                //$output .= str_pad($tile->getY() . '-' . $tile->getX(), 5);
+                if ($path && $path->contains($tile)) {
+                    $output .= $path->getChar($tile);
+                } else {
+                    $output .= $tile->getChar();
+                }
             }
             $output .= PHP_EOL;
         }

@@ -15,6 +15,7 @@ class Path
     private array $instructions = [];
 
     private string $status = self::STATUS_WALKING;
+    private array $firstCoords = [];
 
     public function __construct(string $direction, int $x, int $y) {
         $this->direction = $direction;
@@ -29,7 +30,7 @@ class Path
 
     public function canMove(MovementOption $move): bool
     {
-        return !in_array($this->toCoords($move), $this->coords, true);
+        return !in_array($this->toCoords($move->getTile()), $this->coords, true);
     }
 
     public function addMove(MovementOption $move): self
@@ -37,11 +38,12 @@ class Path
         $newPath = clone $this;
         $newPath->instructions[] = $move->convertToInstruction();
         $newPath->direction = $move->getDirection();
-        $newPath->coords[] = $this->toCoords($move);
+        $newPath->coords[] = $this->toCoords($move->getTile());
         $newPath->xPos = $move->getTile()->getX();
         $newPath->yPos = $move->getTile()->getY();
 
         if ($move->getTile() instanceof Van) {
+            $newPath->firstCoords = $newPath->coords;
             $newPath->coords = []; //Reset prev. path to prevent blocking
             $newPath->status = self::STATUS_DRIVING;
         }
@@ -53,9 +55,9 @@ class Path
         return $newPath;
     }
 
-    private function toCoords(MovementOption $move): string
+    private function toCoords(TileInterface  $tile): string
     {
-        return sprintf('%s-%s', $move->getTile()->getY(), $move->getTile()->getX());
+        return sprintf('%s-%s', $tile->getY(), $tile->getX());
     }
 
     public function getInstructions(): string
@@ -76,6 +78,16 @@ class Path
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    public function contains($tile): bool
+    {
+        return in_array($this->toCoords($tile), $this->coords, true) || in_array($this->toCoords($tile), $this->firstCoords, true);
+    }
+
+    public function getChar($tile): string
+    {
+        return in_array($this->toCoords($tile), $this->coords, true) ? '~' : '*';
     }
 }
 

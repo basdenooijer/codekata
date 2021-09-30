@@ -5,10 +5,12 @@ declare(strict_types=1);
 class Navigator
 {
     private Map $map;
+    private bool $debug;
 
-    public function __construct(Map $map)
+    public function __construct(Map $map, $debug = false)
     {
         $this->map = $map;
+        $this->debug = $debug;
     }
 
     public function navigate(): void
@@ -23,15 +25,21 @@ class Navigator
     {
         foreach ($this->getMovementOptions($path) as $option) {
             $newPath = $path->addMove($option);
+
+            if ($this->debug) {
+                echo $this->map->draw($newPath);
+                usleep(100000);
+            }
+
             $this->explorePath($newPath);
         }
 
-        //var_dump($path->getInstructions() . ' = ' . $path->getStatus() . ' = R' . $path->getY() . ' K'.$path->getX());
-
         if ($path->getStatus() === Path::STATUS_FINISHED) {
+            echo $this->map->draw($path);
             echo PHP_EOL.PHP_EOL;
-            var_dump($path->getInstructions());
+            echo $path->getInstructions();
             echo PHP_EOL.PHP_EOL;
+            exit();
         }
 
         //TODO return value

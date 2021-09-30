@@ -18,8 +18,6 @@ include 'Tiles/Gate.php';
 
 $map = Map::createFromFile('map.txt');
 
-echo $map->draw();
-
-$navigator = new Navigator($map);
+$navigator = new Navigator($map, true);
 $navigator->navigate();
 
